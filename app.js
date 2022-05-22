@@ -2,7 +2,23 @@ const express=require('express');
 const {body, validationResult}=require('express-validator')
 const req = require('express/lib/request');
 const app=express();
+const morgan = require('morgan')
+const config = require('config')
 app.use(express.json());
+app.use (express.urlencoded({extended:true}));
+app.use (express.static("public"));
+/*
+console.log('Application Name:',config.get("name"))
+console.log('version:',config.get("version"))
+console.log('sms:',config.get("sms.ip"))
+//console.log('smsKey:',config.get("sms.key"))
+if(app.get('env')==='development'){
+    console.log('morgan is active');
+    app.use(morgan('tiny'));
+}
+*/
+
+
 let users=require('./users.js')
 app.get('/api/users',(req,res)=>{
     res.json({
@@ -95,3 +111,4 @@ app.delete('/api/users/:id',(req,res)=>{
 const port=process.env.PORT || 3000;
 app.listen(port,()=>
     console.log('listening on port:'+port));
+
