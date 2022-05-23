@@ -4,8 +4,10 @@ mongoose.connect('mongodb://localhost:27017/Mongo')
     .catch((err)=>console.log('could not connect to mongo'));
 
 const userSchema=new mongoose.Schema({
-    first_name:String,
-    last_name:{type:String,require:true},
+    first_name:{type:String,minlength:3,maxlength:20},
+   // last_name:{type:String,required:function(){return this.admin}},
+   age:{type:Number,min:8,max:12}, 
+   last_name:{type:String,required:true},
     favorites:[String],
     admin:Boolean,date:{type:Date,default:Date.now}
 });
@@ -16,18 +18,26 @@ const User=mongoose.model('User',userSchema);
 
 async function createUser(){
     const user=new User({
-        first_name:'Ehsan',
-        last_name:'Bavil',
+        first_name:'Shahgol',
+     //   last_name:'Amini',
         favorites:['Ship','Music','Womans:D'],
         admin:false
     });
 
-    const result= await user.save();
-    console.log(result);
+    
+   try{
+        const result= await user.save();
+        console.log(result);
+    }catch(ex){
+        console.log(ex.message);
+
+    }
+
+
 };
 
 
-//createUser();
+createUser();
 
 
 async function getUsers(){
@@ -62,4 +72,4 @@ async function updateUser_2(id){ // Comment: Update with Second aproach
 
 }
 
-updateUser_2(("628b016ce291f683ed1d4265")) //Comment: Please Enter a ID number
+//updateUser_2(("628b016ce291f683ed1d4265")) //Comment: Please Enter a ID number
