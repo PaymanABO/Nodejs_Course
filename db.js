@@ -4,12 +4,13 @@ mongoose.connect('mongodb://localhost:27017/Mongo')
     .catch((err)=>console.log('could not connect to mongo'));
 
 const userSchema=new mongoose.Schema({
-    first_name:{type:String,minlength:3,maxlength:20},
-   // last_name:{type:String,required:function(){return this.admin}},
+   first_name:{type:String,minlength:3,maxlength:20,lowercase:true,},
+   salary:{type:Number,required:true,get:v=>Math.round(v)},
+   last_name:{type:String,required:function(){return this.admin}},
    age:{type:Number,min:8,max:12}, 
    last_name:{type:String,required:true},
-    favorites:[String],
-    admin:Boolean,date:{type:Date,default:Date.now}
+   favorites:[String],
+   admin:Boolean,date:{type:Date,default:Date.now}
 });
 
 
@@ -19,7 +20,8 @@ const User=mongoose.model('User',userSchema);
 async function createUser(){
     const user=new User({
         first_name:'Shahgol',
-     //   last_name:'Amini',
+        salary:16.9,
+        last_name:'Amini',
         favorites:['Ship','Music','Womans:D'],
         admin:false
     });
@@ -37,15 +39,15 @@ async function createUser(){
 };
 
 
-createUser();
+//createUser();
 
 
 async function getUsers(){
-    const users= await User.find({last_name:{$eq:'Bavil'}}).sort({first_name:1});
-    console.log(users);
+    const users= await User.find({last_name:{$eq:'Amini'}});
+    console.log(users[1].salary);
 }
 
-//getUsers();
+//getUsers("628dc6b06e6e23dc7c9b8a6b");
 
 
 async function updateUser_1(id){ // Comment: Update with First aproach

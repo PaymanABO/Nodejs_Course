@@ -1,18 +1,21 @@
 const express=require('express');
 const router= express.Router();
 const {body, validationResult}=require('express-validator')
-let users=require('../users.js')
+const User=require('./../models/user');
 
-
-router.get('/',(req,res)=>{
+router.get('/',async(req,res)=>{
+    console.log("Get shodam")
+    const users=await User.find();
+    
     res.json({
         data:users,
         message:'ok'
     });
 });
 
-router.get('/users/:id',(req,res)=>{
-    const user=users.find((a)=>a.id===parseInt(req.params.id));
+router.get('/:id',async(req,res)=>{
+    console.log("Get shodam ba ID")
+    const user=await User.findById(req.params.id);
     if(!user)
         { return res.json({
         data:null,
@@ -25,17 +28,27 @@ router.get('/users/:id',(req,res)=>{
     });
 });
 
-router.post('/users/',[
+router.post('/',[
     body('email','email must be valid').isEmail(),
     body('first_name','first name cant be empty').notEmpty(),
-    ],(req,res)=>{
+    ],async(req,res)=>{
+        console.log("Post shodam")
     const errors = validationResult(req);
         if(!errors.isEmpty()){
-        return res.status(400).json({data:null, errors:errors.array(),message:"validation error"})
+        return res.status(400)
+        .json({
+            data:null, 
+            errors:errors.array(),
+            message:"validation error"});
         }
-    users.push({id:users.length + 1, ...req.body})
-    res.json({
-        data:users,
+        let newUser=new User({
+            first_name:req.body.first_name,
+            last_name:req.body.last_name,
+            email:req.body.email
+        })
+        newUser= await newUser.save()
+        res.json({
+        data:newUser,
         message:'ok'
     });
 
@@ -44,36 +57,40 @@ router.post('/users/',[
 router.put('/:id',[
     body('email','email must be valid').isEmail(),
     body('first_name','first name cant be empty').notEmpty(),
-    ],(req,res)=>{
-    const user= users.find((a)=> a.id===parseInt(req.params.id))
-        if(!user){
-           return res.status(404).json({
-           data:null,
-           message:'the user is not here'
-           });
-        }
-    
-    const errors = validationResult(req);
+    body('last_name','last name cant be empty').notEmpty(),
+    ],
+    async(req,res)=>{
+        console.log("Put shodam ba ID")
+        const errors = validationResult(req);
         if(!errors.isEmpty()){
-        return res.status(400).json({data:null, errors:errors.array(),message:"validation error"})
+           return res.status(404)
+             .json({
+             data:null,
+             errors:errors.array(),
+             message:"validation error"});
         }
-
-    users =users.map(user=>{
-        if(user.id==req.params.id){
-        return {...user, ...req.body}
-        }
-        return user;
-    })
-
-    res.json({
-    data:users,
+        
+    const user =await User.findByIdAndUpdate(req.params.id,{
+        first_name:req.body.first_name,
+        last_name:req.body.last_name,
+        email:req.body.email,
+    },{new:true});
+    if(!user){
+        return res.status(404).json({
+            data:null,
+            message:"the user with the given id was not found",
+        });
+    }
+     res.json({
+    data:user,
     message:'ok'
     });
 
 });
 
-router.delete('/:id',(req,res)=>{
-    const user= users.find((a)=> a.id===parseInt(req.params.id))
+router.delete('/:id',async(req,res)=>{
+    console.log("Delete shodam ba ID")
+    const user= await User.findByIdAndRemove(req.body.id)
         if(!user){
            return res.status(404).json({
            data:null,
@@ -81,10 +98,8 @@ router.delete('/:id',(req,res)=>{
            });
         }
     
-    const index= users.indexOf(user);
-    users.splice(index,1);
     res.json({
-        data:users,
+        data:user,
         message:'ok'
     });
 
